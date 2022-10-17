@@ -1,0 +1,53 @@
+stages:
+  - build
+  - deploy
+  
+docker-build:
+    stage: build
+    before_script:
+    script:
+        - cd /home/projects/psp/frontend/Dashboard
+        - git checkout develop
+        - git pull origin develop
+        - docker system prune -f
+        - docker build  -t  reg.ratelands.com/psp/Dashboard   .
+        - docker push reg.ratelands.com/psp/Dashboard 
+    tags:
+        - psp-nexus
+    only:
+      refs:
+        - develop
+
+
+develop-deploy:
+    stage: deploy
+    script:
+        - cd /home/projects/psp/frontend/Dashboard
+        - git checkout develop
+        - git pull origin develop
+        - docker pull reg.ratelands.com/psp/Dashboard
+        - docker-compose up -d
+    tags:
+        - psp-dev
+    only:
+      refs:
+        - develop
+
+
+
+production-deploy:
+    stage: deploy
+    script:
+        - cd /home/projects/psp/frontend/Dashboard
+        - git checkout master
+        - git pull origin master
+        - docker pull reg.ratelands.com/psp/Dashboard
+        - docker-compose up -d --build
+        - docker-compose stop
+        - docker-compose up -d 
+        
+    tags:
+        - psp-prod
+    only:
+      refs:
+        - master
