@@ -1,12 +1,12 @@
-const { required, email } = require("vuelidate/lib/validators");
+const { required } = require("vuelidate/lib/validators");
 
 export const FORM_LOGIN_SCHEMA = {
   /* Form SCHEMA */
   schema: [
     {
-      id: "email",
-      label: "email",
-      placeholder: "email",
+      id: "userName",
+      label: "userName",
+      placeholder: "",
       cols: 12,
       lg: 12,
       md: 12,
@@ -16,7 +16,7 @@ export const FORM_LOGIN_SCHEMA = {
     {
       id: "password",
       label: "password",
-      placeholder: "password",
+      placeholder: "",
       cols: 12,
       lg: 12,
       md: 12,
@@ -27,14 +27,16 @@ export const FORM_LOGIN_SCHEMA = {
 
   /* Form MODEL */
   model: {
-    email: null,
+    userName: null,
     password: null,
   },
 
   /* VALIDATION SCHEMA */
   validations: {
     form: {
-      email: { required, email },
+      userName: {
+        required,
+      },
       password: { required },
     },
   },

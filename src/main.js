@@ -13,6 +13,7 @@ import Vuelidate from "vuelidate";
 import vuelidateErrorExtractor, { templates } from "vuelidate-error-extractor";
 import vuetify from "./plugins/vuetify";
 import storage from "@/tools/Storage";
+import globalMixin from "@/mixins/global";
 import app from "@/tools/App";
 
 Vue.config.productionTip = false;
@@ -22,6 +23,7 @@ Vue.use(currency_formatter);
 Vue.use(unit_formatter);
 Vue.use(dynamic_image_loader);
 Vue.use(goBackNavigator);
+Vue.use(globalMixin);
 Vue.use(Vuelidate);
 Vue.use(vuelidateErrorExtractor, {
   /**

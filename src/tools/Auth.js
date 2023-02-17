@@ -60,6 +60,13 @@ const auth = {
     return token != null && token !== "" && token !== undefined;
   },
 
+  // this method check if user's role is admin or not
+  isAdmin() {
+    let token = this.getToken();
+    let user = this.getUserInfo();
+    return token != null && token !== "" && token !== undefined && user.isAdmin;
+  },
+
   // This method remove token and all user data
   // of database
   removeToken() {

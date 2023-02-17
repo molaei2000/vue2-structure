@@ -4,7 +4,7 @@ import { _t } from "@/tools/Utils";
 
 export default [
   {
-    path: "/",
+    path: "/auth",
     name: "auth",
     component: () => import("@/packages/authenticate/layout/Auth.layout"),
     meta: {
@@ -19,7 +19,16 @@ export default [
         name: "auth.login",
         component: () => import("@/packages/authenticate/views/auth/Login"),
         meta: {
-          title: _t("authentication.route_titles.login"),
+          title: _t("authentication.router_title.login"),
+          headTags: [],
+        },
+      },
+      {
+        path: "/auth/register",
+        name: "auth.register",
+        component: () => import("@/packages/authenticate/views/auth/Register"),
+        meta: {
+          title: _t("authentication.router_title.register"),
           headTags: [],
         },
       },
@@ -28,25 +37,7 @@ export default [
         name: "password.forgot",
         component: () => import("@/packages/authenticate/views/auth/Forgot"),
         meta: {
-          title: _t("authentication.route_titles.forgot_password"),
-          headTags: [],
-        },
-      },
-      {
-        path: "/reset-password",
-        name: "reset-password:token?",
-        component: () =>
-          import("@/packages/authenticate/views/auth/ResetPassword"),
-        meta: {
-          title: _t("authentication.route_titles.forgot_password"),
-        },
-      },
-      {
-        path: "/password/reset",
-        name: "password.reset",
-        component: () => import("@/packages/authenticate/views/auth/Reset"),
-        meta: {
-          title: _t("authentication.route_titles.reset_password"),
+          title: _t("authentication.router_title.forget_password"),
           headTags: [],
         },
       },

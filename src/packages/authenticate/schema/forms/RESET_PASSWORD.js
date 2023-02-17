@@ -1,32 +1,36 @@
-const { required, email } = require("vuelidate/lib/validators");
+import { helpers, numeric, required } from "vuelidate/lib/validators";
 
 export const RESET_PASSWORD = {
   /* Form SCHEMA */
   schema: [
     {
-      id: "email",
-      label: "email",
-      placeholder: "email",
+      id: "mobile_number",
+      label: "mobile_number",
+      placeholder: "mobile_number",
       cols: 12,
       lg: 12,
       md: 12,
       sm: 12,
-      type: "text",
+      type: "mobile",
     },
   ],
 
   /* Form MODEL */
   model: {
-    email: null,
-    reset_url:
-      process.env.VUE_APP_RESET_PASS_URL ||
-      "https://app.appmaker24.com/reset-password",
+    mobile_number: null,
   },
 
   /* VALIDATION SCHEMA */
   validations: {
     form: {
-      email: { required, email },
+      mobile_number: {
+        required,
+        numeric,
+        phone_number: helpers.regex(
+          "phone_number",
+          /^[(]?[0-9]{3}[)]?[0-9]{3}?[0-9]{5}$/
+        ),
+      },
     },
   },
 };

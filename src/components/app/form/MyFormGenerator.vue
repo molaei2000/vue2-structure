@@ -1,7 +1,11 @@
 <template>
-  <form-wrapper :validator="validator.form" class="w-100 mx-auto">
+  <form-wrapper
+    :validator="validator.form"
+    class="form-generator"
+    style="width: 100%"
+  >
     <slot v-if="$slots['form-body']" name="form-body" />
-    <v-row v-else>
+    <v-row v-else style="width: 100% !important" class="ma-0">
       <!--Start form inputs  ---------------------->
       <v-col
         v-for="input in schema"
@@ -10,115 +14,204 @@
         :cols="input.cols || 12"
         :lg="input.lg || $attrs.lg"
         :md="input.md || 6"
-        class="py-0 px-0"
+        class="flex-column flex-wrap pt-0"
+        :class="input.class"
       >
-        <MyFormGroup :name="input.id" :attribute="$_t(`attribute.${input.id}`)">
+        <!--        select -->
+        <form-group
+          v-if="input.type === 'select'"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline'"
+          class="offset-xs7"
+        >
+          <v-select
+            :disabled="input.disabled === 'true'"
+            :label="$_t(`attribute.${input.label}`)"
+            slot-scope="{ attrs }"
+            v-bind="attrs"
+            outlined
+            :item-text="input.text || 'text'"
+            :item-value="input.value || ((item) => item)"
+            :items="input.items"
+            dense
+            :placeholder="
+              input.placeholder ? $_t(`placeholder.${input.placeholder}`) : ''
+            "
+            :menu-props="{
+              'offset-y': true,
+              'nudge-top': -1,
+              closeOnClick: true,
+            }"
+            v-model="validator.form[input.id].$model"
+            @input="validator.form[input.id].$touch()"
+          ></v-select>
+        </form-group>
+        <!--                date -->
+        <form-group
+          v-if="input.type === 'date'"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline '"
+        >
+          <v-menu
+            ref="menu"
+            v-if="input.type === 'date'"
+            :close-on-content-click="false"
+            offset-y
+            min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model="validator.form[input.id].$model"
+                :label="$_t(`attribute.${input.label}`)"
+                :placeholder="
+                  input.placeholder
+                    ? $_t(`placeholder.${input.placeholder}`)
+                    : ''
+                "
+                dense
+                outlined
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="validator.form[input.id].$model"
+              locale="fa"
+              no-title
+              scrollable
+            >
+            </v-date-picker>
+          </v-menu>
+        </form-group>
+        <!-- time -->
+        <form-group
+          v-if="input.type === 'time'"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline '"
+        >
           <template v-slot:label>
             <p
-              class="black--text text-left mb-1 text-break text-body-2"
-              v-if="input.required"
-              :class="input.label_class"
-            >
-              {{ $_t(`attribute.${input.label}`) + " *" }}
-            </p>
-            <p
-              class="black--text text-left mb-1 text-break text-body-2"
-              v-else
-              :class="input.label_class"
+              class="d-flex justify-space-between form-generator__label black--text text-left text-capitalize mb-1"
             >
               {{ $_t(`attribute.${input.label}`) }}
             </p>
           </template>
-          <v-select
-            v-if="input.type === 'select'"
-            dense
-            flat
-            solo
-            outlined
-            :class="input.class"
-            slot-scope="{ attrs }"
-            v-bind="attrs"
-            :items="lists[input.id]"
-            item-text="name"
-            :placeholder="$_t(`placeholder.${input.placeholder}`)"
-            :item-value="(item) => ({ id: item.id, name: item.name })"
-            @input="
-              validator.form[input.id].$touch();
-              $emit('update', $event);
-            "
-            v-model="validator.form[input.id].$model"
-            background-color="inputColor"
-            color="primary"
-            :append-outer-icon="
-              input.append_outer_icon ? input.append_outer_icon : ''
-            "
-            @click:append-outer="$emit('editHospital')"
-          />
-          <v-select
-            v-else-if="input.type === 'select_status'"
-            dense
-            flat
-            solo
-            outlined
-            :class="input.class"
-            slot-scope="{ attrs }"
-            v-bind="attrs"
-            :items="statusList"
-            :placeholder="$_t(`placeholder.${input.placeholder}`)"
-            item-text="name"
-            item-value="id"
-            @input="
-              validator.form[input.id].$touch();
-              $emit('update', $event);
-            "
-            v-model="validator.form[input.id].$model"
-            background-color="inputColor"
-            color="primary"
-          />
           <v-text-field
-            v-else-if="input.type === 'password'"
-            outlined-red
-            :disabled="input.disabled === 'true'"
             class="form-generator__text-field"
             slot-scope="{ attrs }"
-            flat
             dense
             outlined
             solo
-            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-            @click:append="show = !show"
-            :type="show ? 'text' : input.type"
-            :hint="input.hint"
-            persistent-hint
+            color="primary"
             :placeholder="
               input.placeholder ? $_t(`placeholder.${input.placeholder}`) : ''
             "
-            item-text="name"
-            item-value="id"
+            v-bind="attrs"
+            :type="input.type"
+            v-model="validator.form[input.id].$model"
+            @input="validator.form[input.id].$touch()"
+          />
+          <v-time-picker
+            v-model="validator.form[input.id].$model"
+            no-title
+          ></v-time-picker>
+        </form-group>
+        <!--        mobile number -->
+        <form-group
+          v-if="input.type === 'mobile'"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline'"
+        >
+          <v-text-field
+            :id="input.id || ''"
+            :disabled="input.disabled === 'true'"
+            class="form-generator__text-field"
+            :label="$_t(`attribute.${input.label}`)"
+            dense
+            outlined
+            dir="ltr"
+            :placeholder="
+              input.placeholder ? $_t(`placeholder.${input.placeholder}`) : ''
+            "
+            :type="input.type"
+            slot-scope="{ attrs }"
             v-bind="attrs"
             v-model="validator.form[input.id].$model"
             @input="validator.form[input.id].$touch()"
-            @keydown.enter="onPressEnter"
           />
+        </form-group>
+        <!--        text or password -->
+        <form-group
+          v-if="['text', 'password'].includes(input.type)"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline'"
+        >
           <v-text-field
-            v-else
-            slot-scope="{ attrs }"
-            :class="input.class"
-            flat
+            :id="input.id || ''"
+            :disabled="input.disabled === 'true'"
+            class="form-generator__text-field"
+            :label="$_t(`attribute.${input.label}`)"
+            :suffix="input.suffix"
             dense
             outlined
-            solo
-            :hint="input.hint"
-            persistent-hint
-            background-color="inputColor"
-            color="primary"
-            :placeholder="$_t(`placeholder.${input.placeholder}`)"
-            v-bind="attrs"
+            :placeholder="
+              input.placeholder ? $_t(`placeholder.${input.placeholder}`) : ''
+            "
             :type="input.type"
+            slot-scope="{ attrs }"
+            v-bind="attrs"
+            v-model="validator.form[input.id].$model"
             @input="validator.form[input.id].$touch()"
-            v-model.trim="validator.form[input.id].$model"
           />
-        </MyFormGroup>
+        </form-group>
+        <!-- file -->
+        <form-group
+          v-if="input.type === 'file'"
+          :name="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline'"
+        >
+          <v-file-input
+            :label="$_t(`attribute.${input.label}`)"
+            dense
+            :multiple="input.multiple || false"
+            chips
+            :append-icon="input.icon ? input.icon : 'mdi-file-image'"
+            outlined
+            :accept="input.accept"
+            slot-scope="{ attrs }"
+            v-bind="attrs"
+            v-model="validator.form[input.id].$model"
+            @input="validator.form[input.id].$touch()"
+          ></v-file-input>
+        </form-group>
+        <!--        textarea -->
+        <form-group
+          v-if="input.type === 'textarea'"
+          :name="input.id"
+          :id="input.id"
+          :attribute="$_t(`attribute.${input.id}`)"
+          :class="inline && 'form-generator__group--inline'"
+        >
+          <v-textarea
+            outlined
+            name="input-7-4"
+            :label="$_t(`attribute.${input.label}`)"
+            :placeholder="
+              input.placeholder ? $_t(`placeholder.${input.placeholder}`) : ''
+            "
+            slot-scope="{ attrs }"
+            v-bind="attrs"
+            v-model="validator.form[input.id].$model"
+            @input="validator.form[input.id].$touch()"
+          />
+        </form-group>
       </v-col>
       <!--End   form inputs  ---------------------->
       <slot name="inline-action" />
@@ -127,41 +220,62 @@
 </template>
 
 <script>
-import MyFormGroup from "@/components/app/form/MyFormGroup";
+import FormGroup from "@/components/app/form/FormGroup";
 import { templates } from "vuelidate-error-extractor";
-import { mapGetters } from "vuex";
-
 export default {
+  name: "MyFormGenerator",
+  inheritAttrs: false,
   data() {
     return {
-      show: false,
+      date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .substr(0, 10),
+      time: null,
+      menu2: false,
+      modal2: false,
+      dialog: false,
     };
-  },
-  computed: {
-    ...mapGetters({
-      statusList: "userManagement/get_status_list",
-    }),
   },
   props: {
     schema: {
       type: Array,
     },
-    lists: {
-      type: Object,
-    },
     validator: {
       type: Object,
     },
+    inline: {
+      type: Boolean,
+    },
   },
   components: {
-    MyFormGroup,
+    FormGroup,
     FormWrapper: templates.FormWrapper,
   },
 };
 </script>
 
-<style>
-.v-input__icon--append-outer button {
-  color: #00573f !important;
+<style lang="scss" scoped>
+.form-generator {
+  $parent: &;
+  &__group {
+    &--inline {
+      @media only screen and (min-width: 768px) {
+        display: flex;
+        justify-content: space-between;
+        #{$parent} {
+          &__label {
+            margin-top: 8px;
+            flex-basis: 40%;
+          }
+          &__text-field {
+            flex-basis: 60%;
+          }
+        }
+      }
+    }
+  }
+  .menuable__content.theme--light {
+    z-index: 2 !important;
+  }
 }
 </style>

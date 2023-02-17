@@ -19,6 +19,14 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
+// Require admin
+router.beforeEach((to, from, next) => {
+  if (!to.matched.some((record) => record.meta.requiresAdmin)) return next();
+  if (!auth.isAdmin())
+    return next({ name: "auth", query: { redirect: to.fullPath } });
+  next();
+});
+
 // This callback runs before every route change, including on page load.
 router.beforeEach((to, from, next) => {
   // This goes through the matched routes from last to first, finding the closest route with a title.

@@ -1,11 +1,12 @@
 export default {
   /*Auth Routes********************/
-  auth_login: "auth/login",
-  auth_refresh: "auth/refresh",
-  auth_logout: "auth/logout",
-  auth_reset_password: "auth/password/request",
-  auth_change_password: "auth/password/reset",
+  auth_login: "user/login",
+  auth_register: "user/register",
+  request_to_verify: "user/requestmoblieverify",
+  verify_code: "user/verify",
 
   /*User Routes********************/
-  user_me: "users/me",
+  is_admin: "user/isadmin",
+  user_me: "user/getuser",
+  one_time_pass: "user/oneTimePassword",
 };
